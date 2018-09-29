@@ -1,51 +1,81 @@
-//import React, { Component } from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
 import './App.css';
+//import { BrowserRouter as Router, Route } from "react-router-dom";
 
-import React from "react";
-import { BrowserRouter as Router, Route } from "react-router-dom";
-//import Discover from "./pages/Discover";
-import clickyGame from "./pages/clickyGame";
-//import Search from "./pages/Search";
+import dogs from './dogs.json';
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+//import Footer from "./components/Footer";
 import Wrapper from "./components/Wrapper";
+import Title from './components/Title';
+import DogCard from './components/DogCard';
 
-const App = () => (
-  <Router>
-    <div>
-      <Navbar />
-      <Wrapper>
-        <Route exact path="/" component={clickyGame} />
-      </Wrapper>
-      <Footer />
-    </div>
-  </Router>
-);
+class App extends Component {
+    state = {
+        message: "Click an image to begin!",
+        topScore: 0,
+        curScore: 0,
+        dogs: dogs,
+        unselectedDogs: dogs
+    }
+
+    componentDidMount() {
+    }
+
+    shuffleArray = array => {
+        for (let i = array.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    selectDog = breed => {
+        const findDog = this.state.unselectedDogs.find(item => item.breed === breed);
+
+        if (findDog === undefined) {
+            // failure to select a new dog
+            this.setState({
+                message: "You guessed incorrectly!",
+                topScore: (this.state.curScore > this.state.topScore) ? this.state.curScore : this.state.topScore,
+                curScore: 0,
+                dogs: dogs,
+                unselectedDogs: dogs,
+            });
+        } else {
+            // success to select a new dog
+            const newDogs = this.state.unselectedDogs.filter(item => item.breed !== breed);
+
+            this.setState({
+                message: "You guessed correctly!",
+                curScore: this.state.curScore + 1,
+                dogs: dogs,
+                unselectedDogs: newDogs,
+            });
+        }
+        this.shuffleArray(dogs);
+    };
+
+    render() {
+        return (
+            <Wrapper>
+                <Navbar
+                    message={this.state.message}
+                    curScore={this.state.curScore}
+                    topScore={this.state.topScore}
+                />
+                <Title />
+                {
+                    this.state.dogs.map(dog => (
+                        <DogCard
+                            breed={dog.breed}
+                            image={dog.image}
+                            selectDog={this.selectDog}
+                            curScore={this.state.curScore}
+                        />
+                    ))
+                }
+            </Wrapper>
+        );
+    }
+}
+
 export default App;
-
-
-
-
-
-
-
-
-// class App extends Component {
-//   render() {
-//     return (
-//       <div className="App">
-//         <header className="App-header">
-//           <img src={logo} className="App-logo" alt="logo" />
-//           <h1 className="App-title">Welcome to React</h1>
-//         </header>
-//         <p className="App-intro">
-//           To get started, edit <code>src/App.js</code> and save to reload.
-//         </p>
-//       </div>
-//     );
-//   }
-// }
-
-// export default App;
-// //-->
